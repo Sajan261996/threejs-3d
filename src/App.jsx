@@ -3,53 +3,39 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import CameraCapture from "./CameraCapture";
 import HeadGroup from "./HeadGroup";
-import hair from "./images/hair.png";
-import { removeBackgroundApi } from "./removeBg";
+import hair from "./images/hair.png"; // transparent hair png
 
 export default function App() {
   const [photo, setPhoto] = useState(null);
-  const [cleanPhoto, setCleanPhoto] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
 
-  const handleCapture = async (img) => {
-    setPhoto(img);                 // ✅ now used
-    setLoading(true);
-    try {
-      const noBg = await removeBackgroundApi(img);
-      setCleanPhoto(noBg);
-    } catch {
-      setCleanPhoto(img);
-    }
-    setLoading(false);
-  };
-
   return (
-    <div style={{ display: "flex", gap: 20 }}>
+    <div style={{ display: "flex", gap: 20, padding: 20 }}>
       <div>
-        <CameraCapture onCapture={handleCapture} />
+        <CameraCapture onCapture={setPhoto} />
 
-        {photo && <img src={photo} width={160} alt="Preview" />} {/* ✅ photo used */}
+        {photo && <img src={photo} width={200} alt="Captured" />}
 
         <br />
+
         <button onClick={() => setIsRotating((p) => !p)}>
           {isRotating ? "Stop Rotation" : "Start Rotation"}
         </button>
-
-        {loading && <p>Removing background...</p>}
       </div>
 
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} style={{ width: 420, height: 420 }}>
         <ambientLight intensity={1.2} />
-        <directionalLight position={[5, 5, 5]} />
-        {cleanPhoto && (
+        <directionalLight position={[5, 5, 5]} intensity={1} />
+
+        {photo && (
           <HeadGroup
-            faceImage={cleanPhoto}
+            faceImage={photo}
             hairImage={hair}
             isRotating={isRotating}
           />
         )}
-        <OrbitControls />
+
+        <OrbitControls enableZoom enablePan />
       </Canvas>
     </div>
   );
